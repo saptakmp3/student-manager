@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171b2b">
+<meta name="description" content="A private student manager for class schedules, attendance, monthly lesson counts, fees, and reminders.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Student Manager">
+<title>Student Manager — Studio Edition</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#f3f0e9;--paper:#fffdf8;--ink:#20243a;--muted:#77798a;--line:#e5e0d6;
+ --night:#171b2b;--night2:#242940;--lime:#d8f36a;--coral:#ff806e;--lav:#c5b8ff;
+ --blue:#7ba9ff;--green:#2e8b68;--red:#d65b58;--gold:#d5a23c;
+ --shadow:0 12px 36px #20243a0c;--radius:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Manrope,system-ui,sans-serif;padding:env(safe-area-inset-top) 0 calc(112px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+main{max-width:980px;margin:auto;padding:22px 18px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:11px}
+.brandmark{height:42px;width:42px;border-radius:14px;background:var(--night);display:grid;place-items:center;color:var(--lime);font-size:22px;box-shadow:4px 4px 0 var(--lav)}
+.brand h1{font-size:clamp(1.35rem,4vw,1.85rem);letter-spacing:-.065em;line-height:1.1;margin:0;font-weight:800}
+.eyebrow{font:500 10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+.btn{border:1px solid var(--line);background:var(--paper);border-radius:13px;padding:10px 13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .16s,box-shadow .16s,background .16s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 5px 0 #20243a10}
+.btn.dark{background:var(--night);border-color:var(--night);color:#fff}
+.btn.lime{background:var(--lime);border-color:var(--lime);color:var(--night)}
+.btn.danger{color:var(--red)}
+.btn.iconbtn{width:42px;height:42px;padding:0;font-size:20px}
+.hero{background:var(--night);color:#fff;border-radius:28px;padding:24px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.hero:after{content:"";position:absolute;width:190px;height:190px;border:1px solid #ffffff18;border-radius:50%;right:-45px;top:-75px;box-shadow:0 0 0 22px #ffffff08,0 0 0 46px #ffffff05}
+.herohead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;position:relative;z-index:1}
+.hero h2{font-size:clamp(1.5rem,5vw,2.25rem);line-height:1.12;letter-spacing:-.06em;margin:7px 0 8px;max-width:560px}
+.hero p{color:#c3c7d7;margin:0}
+.datepill{background:#ffffff12;border:1px solid #ffffff20;border-radius:999px;padding:7px 10px;font:11px 'DM Mono',monospace;white-space:nowrap}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:24px;position:relative;z-index:1}
+.metric{background:#ffffff0d;border:1px solid #ffffff14;border-radius:16px;padding:12px}
+.metric .num{font-size:clamp(1.35rem,4vw,2rem);font-weight:800;letter-spacing:-.06em;line-height:1.2}
+.metric .label{font-size:11px;color:#c3c7d7;margin-top:4px}
+.today{margin:18px 0 24px;background:var(--lime);border-radius:18px;padding:14px 16px;color:var(--night)}
+.todaytop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}
+.today h3{margin:0;font-size:14px;letter-spacing:-.03em}
+.today .tag{font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em}
+.today p{margin:3px 0;font-size:13px}
+.todayclass{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #20243a20}.todayclassinfo{min-width:0}.todayclassinfo p{margin:0 0 3px}.takenstate,.scheduledstate{display:inline-block;font:10px 'DM Mono',monospace;opacity:.85}.takenstate{font-weight:500}.pendingstate{color:#9f4a32}.taken-btn{flex-shrink:0;border:1px solid var(--night);background:var(--night);color:white;border-radius:10px;padding:8px 11px;font-size:11px;font-weight:800;white-space:nowrap}.taken-btn:hover{filter:brightness(1.15)}.todayfoot{border-top:1px solid #20243a20;padding-top:8px;margin-top:8px!important;font-size:11px!important;opacity:.8}
+.pendingpanel{margin:0 0 24px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow)}.pendinghead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px}.pendinghead h3{font-size:15px;letter-spacing:-.04em;margin:3px 0 0}.pendingcount{font:10px 'DM Mono',monospace;background:#ffe5e0;color:#a33e36;border-radius:999px;padding:6px 8px;white-space:nowrap}.pendingrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line)}.pendingrow>div{min-width:0}.pendingrow strong{display:block;font-size:12px}.pendingrow small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.trackeritem{gap:8px}.trackeritem>span:nth-child(2){min-width:0;flex:1}.trackeritem small{display:block;font-size:10px;font-weight:500;color:var(--muted);line-height:1.45;margin-top:3px}.trackercheck{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#e2f5e8;color:#236b47;font-weight:800;flex-shrink:0}.pendingcheck{background:#eeedf0;color:#777}.tracker-undo{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:8px;padding:5px 7px;font-size:10px;font-weight:800;flex-shrink:0}
+.sectionhead{display:flex;align-items:end;justify-content:space-between;gap:10px;margin:26px 2px 12px}
+.sectionhead h2{margin:0;font-size:1.25rem;letter-spacing:-.05em}
+.sectionhead p{margin:2px 0 0;color:var(--muted);font-size:12px}
+.tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;margin-bottom:12px}
+.searchwrap{position:relative}
+.searchwrap span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:17px}
+input,select,textarea{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:13px;padding:11px 12px;min-width:0}
+.searchwrap input{padding-left:40px}
+.filters{display:flex;flex-direction:column;gap:9px;margin-bottom:14px}
+.chips{display:flex;align-items:center;gap:7px;overflow-x:auto;padding:2px 1px 5px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chiplabel{font:10px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);min-width:48px}
+.chip{border:1px solid var(--line);background:#ffffff80;border-radius:999px;padding:7px 12px;white-space:nowrap;font-size:12px;font-weight:700;transition:.15s}
+.chip.on{background:var(--night);border-color:var(--night);color:#fff}
+.sortline{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sortline label{color:var(--muted);font-size:12px}
+.sortline select{width:auto;padding:8px 30px 8px 10px;font-size:12px}
+.list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.student{--accent:var(--lav);background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:14px;display:grid;grid-template-columns:58px minmax(0,1fr);gap:12px;position:relative;box-shadow:var(--shadow);transition:transform .18s,border-color .18s;cursor:pointer;min-width:0}
+.student:hover{transform:translateY(-3px);border-color:#c7c1b5}
+.student.discontinued{opacity:.6;filter:saturate(.55)}
+.avatar{width:58px;height:58px;border-radius:19px;background:var(--accent);display:grid;place-items:center;overflow:hidden}
+.avatar svg{width:100%;height:100%;display:block}
+.studentmain{min-width:0;padding-right:2px}
+.studenttop{display:flex;justify-content:space-between;align-items:flex-start;gap:7px}
+.studentname{font-weight:800;font-size:15px;letter-spacing:-.04em;overflow-wrap:anywhere;line-height:1.25;margin:2px 0 7px}
+.badges{display:flex;flex-wrap:wrap;gap:5px}
+.badge{font:9px 'DM Mono',monospace;letter-spacing:.025em;border-radius:6px;padding:4px 6px;background:#efedf7;color:#565071}
+.badge.personal{background:#ffeadf;color:#8e4b37}
+.badge.online{background:#e4efff;color:#315b9b}
+.badge.offline{background:#e3f3e7;color:#28664c}
+.schedule{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.7;overflow-wrap:anywhere}
+.note{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cardbottom{grid-column:1/-1;border-top:1px solid var(--line);padding-top:11px;margin-top:1px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.status{font:10px 'DM Mono',monospace;color:var(--muted)}
+.fee{border:0;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:800;display:inline-flex;align-items:center;gap:5px}
+.fee.p{background:#e2f5e8;color:#236b47}.fee.u{background:#ffe5e0;color:#a33e36}.fee.x{background:#eeedf0;color:#777}
+.fab{position:fixed;right:22px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:5;width:62px;height:62px;border:0;border-radius:22px;background:var(--lime);color:var(--night);font-size:30px;box-shadow:0 7px 0 #20243a18,0 15px 28px #20243a20;transition:transform .15s}
+.fab:hover{transform:translateY(-3px) rotate(4deg)}
+.empty{grid-column:1/-1;text-align:center;padding:38px 18px;background:#ffffff75;border:1px dashed #cfc8bb;border-radius:20px;color:var(--muted)}
+.empty .emoji{font-size:34px;margin-bottom:8px}
+dialog{border:1px solid #ffffff60;border-radius:25px;padding:0;width:min(600px,94vw);max-height:91dvh;background:var(--paper);color:var(--ink);box-shadow:0 25px 90px #10132155;overflow:auto}
+dialog::backdrop{background:#171b2bb3;backdrop-filter:blur(5px)}
+.modalhead{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:18px 20px;background:var(--paper);border-bottom:1px solid var(--line)}
+.modalhead h2{margin:0;font-size:1.3rem;letter-spacing:-.05em}
+.modalbody{padding:18px 20px 22px}
+label{display:block;font-size:12px;font-weight:800;margin:15px 0 6px}
+label:first-child{margin-top:0}
+.helper{font-size:11px;color:var(--muted);margin:5px 0 0}
+.avatars{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+.avatars button{border:2px solid transparent;border-radius:15px;background:#f0eee8;padding:3px;aspect-ratio:1}
+.avatars button.on{border-color:var(--night);box-shadow:0 0 0 2px var(--lime)}
+.avatars svg{width:100%;height:100%;display:block}
+.segment{display:flex;flex-wrap:wrap;gap:7px}
+.segment button{border:1px solid var(--line);border-radius:999px;background:#f4f1ea;padding:8px 12px;font-size:12px;font-weight:700}
+.segment button.on{background:var(--night);color:white;border-color:var(--night)}
+.days button{min-width:42px;padding:9px 8px}
+.slot{display:grid;grid-template-columns:48px minmax(0,1fr);align-items:center;gap:9px;margin:8px 0}
+.slot span{font:11px 'DM Mono',monospace;color:var(--muted)}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.actions .push{margin-left:auto}
+.settingsintro{font-size:12px;color:var(--muted);margin:0 0 14px}
+.changegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:24px}
+.changeitem{display:flex;align-items:flex-start;gap:11px;background:var(--paper);border:1px solid var(--line);border-radius:17px;padding:13px;min-width:0;box-shadow:var(--shadow)}
+.changeicon{width:38px;height:38px;flex:none;border-radius:13px;background:#efedf7;display:grid;place-items:center;font-size:18px}
+.changecontent{min-width:0;flex:1}.changetitle{font-size:13px;font-weight:800;letter-spacing:-.03em;overflow-wrap:anywhere}.changedetail{font-size:11px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}.changetype{font:9px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.07em;display:inline-block;margin-top:7px;padding:4px 6px;border-radius:6px;background:#efedf7;color:#565071}
+.changeitem.cancelled .changeicon{background:#ffe5e0;color:#a33e36}.changeitem.rescheduled .changeicon{background:#e4efff;color:#315b9b}.changeitem.makeup .changeicon{background:#e2f5e8;color:#236b47}
+.changeactions{display:flex;gap:5px;margin-left:auto;flex:none}.changeactions .btn{padding:6px 8px;font-size:10px;border-radius:9px}
+.changeempty{grid-column:1/-1;padding:18px;background:#ffffff75;border:1px dashed #cfc8bb;border-radius:17px;color:var(--muted);font-size:12px}
+.monthly-mini{margin-top:10px;border:1px solid #eae5dc;background:#faf7ef;border-radius:11px;padding:8px 9px}.monthly-minihead{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:10px;color:var(--muted)}.monthly-minihead strong{font:500 10px 'DM Mono',monospace;color:var(--ink)}.monthly-track{height:5px;background:#e7e2d8;border-radius:99px;overflow:hidden;margin-top:6px}.monthly-track span{display:block;height:100%;background:var(--green);border-radius:99px}
+.trackerpanel{background:#f7f4ec;border:1px solid var(--line);border-radius:17px;padding:13px;margin-top:9px}.trackerhead{display:flex;justify-content:space-between;align-items:center;gap:10px}.trackerhead strong{font-size:14px;letter-spacing:-.03em}.tracker-count{font:500 11px 'DM Mono',monospace;color:var(--green);white-space:nowrap}.trackerbar{height:6px;background:#e4dfd5;border-radius:99px;overflow:hidden;margin:10px 0 12px}.trackerbar span{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .2s}.trackeritems{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.trackeritem{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:11px;padding:9px;min-width:0;margin:0;cursor:pointer}.trackeritem input{width:17px;height:17px;min-width:17px;margin:0;accent-color:var(--green)}.trackeritem span{font-size:11px;font-weight:700}.trackeritem.done span{color:var(--green);text-decoration:line-through}.trackerhint{font-size:11px;color:var(--muted);margin:9px 0 0}.tracker-history{font-size:10px;color:var(--muted);margin-top:8px}
+@media(max-width:650px){.changegrid{grid-template-columns:1fr}.changeactions{flex-direction:column}.formgrid{grid-template-columns:1fr}.trackeritems{grid-template-columns:1fr}}
+.view{display:none}.view.on{display:block;animation:viewin .18s ease}
+@keyframes viewin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;justify-content:center;gap:4px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:#fffdf8f0;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+.tabbar button{flex:1;max-width:190px;border:0;background:transparent;border-radius:14px;padding:7px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-weight:700;font-size:11px;position:relative;transition:background .15s,color .15s}
+.tabbar .ti{font-size:19px;line-height:1.1}
+.tabbar button.on{background:var(--night);color:#fff}
+.tabbar button.on .ti{color:var(--lime)}
+.tabbadge{position:absolute;top:2px;left:calc(50% + 8px);min-width:17px;height:17px;border-radius:99px;background:var(--coral);color:#fff;font:600 9px 'DM Mono',monospace;display:grid;place-items:center;padding:0 4px}
+.tabbadge:empty{display:none}
+body:not([data-tab=students]) .fab{display:none}
+.filterbox{margin-bottom:12px}
+.filterbox summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--paper);border-radius:13px;padding:9px 13px;font-weight:700;font-size:13px}
+.filterbox summary::-webkit-details-marker{display:none}
+.filterbox[open] summary{margin-bottom:10px}
+.rowbtns{display:flex;gap:6px;flex-shrink:0}
+.taken-btn.ghost{background:transparent;color:var(--night);border-color:#20243a45}
+.payrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.payrow>div{min-width:0}.payrow strong{font-size:12px}.payrow small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.backupnote{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--paper);border:1px solid var(--gold);border-radius:18px;padding:12px 14px;margin-bottom:14px}
+.backupnote strong{font-size:13px}.backupnote small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.settingscard{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}
+#msg{font-size:12px;color:var(--green);margin:12px 0 0;overflow-wrap:anywhere}
+hr{border:0;border-top:1px solid var(--line);margin:20px 0}
+@media(max-width:650px){
+ main{padding:15px 13px}.topbar{align-items:flex-start}.topbar .btn{font-size:11px;padding:9px 10px}
+ .hero{padding:20px;border-radius:23px}.metrics{gap:7px}.metric{padding:10px}.metric .label{font-size:10px}
+ .list{grid-template-columns:1fr}.student{grid-template-columns:60px minmax(0,1fr);padding:13px}
+ .avatar{width:60px;height:60px}.studentname{font-size:16px}
+ .tools{grid-template-columns:minmax(0,1fr)}.sortline{justify-content:flex-start}.sortline select{margin-left:auto}
+ .avatars{grid-template-columns:repeat(6,minmax(0,1fr))}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body data-tab="today">
+<main>
+ <header class="topbar">
+  <div class="brand"><div class="brandmark" aria-hidden="true">✳</div><div><div class="eyebrow">Your teaching studio</div><h1>Student Manager<span style="color:#8b83c9">.</span></h1></div></div>
+ </header>
+
+ <div class="view" id="view-today">
+  <div id="backupnote"></div>
+  <section class="hero">
+   <div class="herohead"><div><div class="eyebrow" style="color:var(--lime)">A little order, a lot more music</div><h2>Your studio.<br>All in rhythm.</h2><p id="herosub">Your students, classes and monthly fees — in one place.</p></div><div class="datepill" id="datepill"></div></div>
+   <div class="metrics">
+    <div class="metric"><div class="num" id="mactive">0</div><div class="label">Active students</div></div>
+    <div class="metric"><div class="num" id="munpaid">0</div><div class="label">Personal fees outstanding</div></div>
+    <div class="metric"><div class="num" id="mclasses">0</div><div class="label">Classes today</div></div>
+   </div>
+  </section>
+  <div id="today"></div>
+  <div id="pending"></div>
+ </div>
+
+ <div class="view" id="view-students">
+  <div class="sectionhead"><div><div class="eyebrow">The roster</div><h2>Your people</h2><p>Tap any student to open their profile.</p></div></div>
+  <div class="tools"><div class="searchwrap"><span aria-hidden="true">⌕</span><input id="q" placeholder="Find a student or note…" aria-label="Search students"></div></div>
+  <details class="filterbox" id="fbox"><summary><span aria-hidden="true">☰</span> Filters <span id="fcount" style="color:var(--muted);font-weight:600"></span></summary><div class="filters" id="chips"></div></details>
+  <div class="sortline"><label id="resultcount">Student directory</label><select id="sort" aria-label="Sort students"><option value="next">Next class</option><option value="name">Name A–Z</option><option value="fee">Unpaid first</option></select></div>
+  <div id="list" class="list" style="margin-top:12px"></div>
+ </div>
+
+ <div class="view" id="view-changes">
+  <div class="sectionhead"><div><div class="eyebrow">Keep the real schedule straight</div><h2>Class changes</h2><p>Reschedules, make-up sessions and cancellations — with reminders updated automatically.</p></div><button class="btn dark" data-a="newchange">＋ Log change</button></div>
+  <div id="changes" class="changegrid"></div>
+ </div>
+
+ <div class="view" id="view-settings">
+  <div class="sectionhead"><div><div class="eyebrow">Keep it in sync</div><h2>Settings &amp; backup</h2><p>Configure push reminders, or export a backup before moving devices.</p></div></div>
+  <div class="settingscard">
+   <p class="settingsintro">Your student records stay in this browser unless you export them.</p>
+   <label for="su">Push server URL</label><input id="su" placeholder="https://student-ledger-push.YOURNAME.workers.dev">
+   <label for="st">Token</label><input id="st" type="password" autocomplete="off">
+   <label for="sm">Morning reminder time</label><input id="sm" type="time" value="07:30">
+   <label for="sb">Backup reminder</label><select id="sb"><option value="3">Every 3 days</option><option value="7">Weekly</option><option value="14">Every 2 weeks</option><option value="30">Monthly</option></select>
+   <p class="helper" id="backupinfo"></p>
+   <div class="actions"><button class="btn dark" data-a="enable">♧ Enable reminders</button><button class="btn" data-a="export">↓ Export backup</button><button class="btn" data-a="import">↑ Import backup</button></div>
+   <p id="msg"></p><input type="file" id="file" accept=".json,application/json" hidden>
+   <hr><div class="eyebrow">Restore points</div><p class="helper">Automatic daily copies, plus one taken before deleting a student or importing. Kept in this browser only — a downloaded backup is still the real safety net.</p><div id="snaplist"></div>
+  </div>
+ </div>
+</main>
+
+<nav class="tabbar" aria-label="Sections">
+ <button type="button" data-a="tab" data-v="today"><span class="ti" aria-hidden="true">✳</span>Today<span class="tabbadge" id="pbadge" aria-label="Classes pending"></span></button>
+ <button type="button" data-a="tab" data-v="students"><span class="ti" aria-hidden="true">☻</span>Students</button>
+ <button type="button" data-a="tab" data-v="changes"><span class="ti" aria-hidden="true">⇄</span>Changes</button>
+ <button type="button" data-a="tab" data-v="settings"><span class="ti" aria-hidden="true">⚙</span>Settings</button>
+</nav>
+<button class="fab" data-a="new" aria-label="Add student">+</button>
+<dialog id="dlg"><div id="fm"></div></dialog>
+<dialog id="changeDlg"><div id="changeForm"></div></dialog>
+<script>
+const $=s=>document.querySelector(s),D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S;
+try{S=JSON.parse(localStorage.getItem('sl1')||'null')}catch(e){S=null}
+S=S&&Array.isArray(S.students)?S:{students:[],cfg:{morning:'07:30'},f:{src:'All',st:'Active',mode:'All',fee:'All',day:'All',sort:'next'}};
+S.cfg=S.cfg||{morning:'07:30'};S.f=Object.assign({src:'All',st:'Active',mode:'All',fee:'All',day:'All',sort:'next'},S.f||{});S.changes=Array.isArray(S.changes)?S.changes:[];S.attendance=Array.isArray(S.attendance)?S.attendance:[];S.payments=Array.isArray(S.payments)?S.payments:[];
+let E=null,C=null,shown={},trackerMonth='';
+const cm=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
+const validTarget=n=>Math.max(1,Math.min(31,Number.isFinite(Number(n))&&Number(n)>0?Math.round(Number(n)):4));
+S.students.forEach(s=>{s.monthlyTarget=validTarget(s.monthlyTarget??4);s.monthlyProgress=s.monthlyProgress&&typeof s.monthlyProgress==='object'?s.monthlyProgress:{}});
+const CLASS_MIN=45; /* two classes closer than this many minutes are flagged as a clash */
+const uid=()=>crypto.randomUUID?crypto.randomUUID().slice(0,12):String(Date.now())+Math.random().toString(36).slice(2,6);
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+const monthLabel=m=>new Intl.DateTimeFormat('en-IN',{month:'short',year:'numeric'}).format(new Date(+String(m).slice(0,4),+String(m).slice(5,7)-1,1));
+const feeModel=s=>s.feeModel==='class'?'class':'monthly';
+const paymentsFor=id=>S.payments.filter(p=>String(p.studentId)===String(id));
+const paidAttIds=()=>{const set=new Set();S.payments.forEach(p=>(p.attIds||[]).forEach(i=>set.add(String(i))));return set};
+function unpaidClasses(s){const set=paidAttIds();return S.attendance.filter(a=>String(a.studentId)===String(s.id)&&a.status!=='missed'&&(!s.feeFrom||String(a.date)>=s.feeFrom)&&!set.has(String(a.id)))}
+const paidMonth=(s,m=cm())=>S.payments.some(p=>String(p.studentId)===String(s.id)&&p.model==='monthly'&&p.month===m);
+function feeInfo(s){const amt=Number(s.feeAmount)||0;
+ if(feeModel(s)==='class'){const u=unpaidClasses(s);return {model:'class',due:u.length>0,count:u.length,amount:u.length*amt,hasAmt:amt>0}}
+ return {model:'monthly',due:!paidMonth(s),amount:amt,hasAmt:amt>0}}
+const paid=s=>!feeInfo(s).due;
+function feeLabel(s){const i=feeInfo(s);if(i.model==='class')return i.due?'◷ '+i.count+' unpaid'+(i.hasAmt?' · '+money(i.amount):''):'✓ All paid';return (i.due?'◷ Unpaid':'✓ Paid')+(i.hasAmt?' · '+money(i.amount):'')}
+function toggleFee(s){const info=feeInfo(s),today=dateKey(new Date());
+ if(info.model==='monthly'){
+  if(!info.due){if(!confirm('Mark '+monthLabel(cm())+' as unpaid for '+s.name+'?'))return;S.payments=S.payments.filter(p=>!(String(p.studentId)===String(s.id)&&p.model==='monthly'&&p.month===cm()))}
+  else S.payments.push({id:uid(),studentId:s.id,model:'monthly',month:cm(),amount:Number(s.feeAmount)||0,date:today});
+ }else{
+  if(!info.due){alert('No unpaid classes for '+s.name+'.');return}
+  const list=unpaidClasses(s);
+  if(!confirm('Record '+(info.hasAmt?money(info.amount)+' for ':'payment for ')+list.length+' class'+(list.length===1?'':'es')+' as paid?'))return;
+  S.payments.push({id:uid(),studentId:s.id,model:'class',amount:info.amount,classes:list.length,attIds:list.map(a=>a.id),date:today});
+ }
+ save()}
+/* Older data stored a paid month on the student; turn that into a payment record. */
+function migrateFees(){S.students.forEach(s=>{if(s.feeMonth){if(!S.payments.some(p=>String(p.studentId)===String(s.id)&&p.model==='monthly'&&p.month===s.feeMonth))S.payments.push({id:uid(),studentId:s.id,model:'monthly',month:s.feeMonth,amount:Number(s.feeAmount)||0,date:'',legacy:true});s.feeMonth=''}})}
+function normalizeState(){S.cfg=S.cfg||{morning:'07:30'};S.changes=Array.isArray(S.changes)?S.changes:[];S.attendance=Array.isArray(S.attendance)?S.attendance:[];S.payments=Array.isArray(S.payments)?S.payments:[];S.f=Object.assign({src:'All',st:'Active',mode:'All',fee:'All',day:'All',sort:'next'},S.f||{});S.students.forEach(s=>{s.monthlyTarget=validTarget(s.monthlyTarget??4);s.monthlyProgress=s.monthlyProgress&&typeof s.monthlyProgress==='object'?s.monthlyProgress:{}});migrateFees()}
+/* Backups and restore points */
+const daysSince=iso=>iso?Math.floor((Date.now()-new Date(iso).getTime())/864e5):null;
+const agoText=iso=>{const n=daysSince(iso);return n===null?'never':n<=0?'today':n===1?'yesterday':n+' days ago'};
+function renderBackupNote(){const el=$('#backupnote');if(!el)return;const n=daysSince(S.lastBackup),lim=Number(S.cfg.backupDays)||7;
+ el.innerHTML=S.students.length&&(n===null||n>=lim)?`<section class="backupnote"><div><strong>Back up your students</strong><small>${n===null?'You haven’t backed up yet — your data lives only in this browser.':'Last backup '+agoText(S.lastBackup)+'.'}</small></div><button class="btn lime" data-a="export">↓ Back up</button></section>`:''}
+function renderBackupInfo(){const el=$('#backupinfo');if(el)el.textContent=S.lastBackup?'Last backup: '+agoText(S.lastBackup)+'.':'No backup yet. Back up now so your data survives a cleared browser or a new phone.'}
+function snapshot(label){try{const arr=JSON.parse(localStorage.getItem('sl1_snaps')||'[]');arr.unshift({t:new Date().toISOString(),label:label||'Auto',json:JSON.stringify(S)});localStorage.setItem('sl1_snaps',JSON.stringify(arr.slice(0,6)))}catch(e){console.warn('Snapshot failed',e)}}
+function renderSnaps(){const box=$('#snaplist');if(!box)return;let arr=[];try{arr=JSON.parse(localStorage.getItem('sl1_snaps')||'[]')}catch(e){}
+ box.innerHTML=arr.length?arr.map((x,i)=>{let n='?';try{n=JSON.parse(x.json).students.length}catch(e){}return `<div class="payrow"><div><strong>${esc(x.label)}</strong><small>${esc(new Intl.DateTimeFormat('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}).format(new Date(x.t)))} · ${n} students</small></div><button type="button" class="tracker-undo" data-a="restore" data-id="${i}">Restore</button></div>`}).join(''):'<p class="helper">No restore points yet.</p>'}
+async function exportBackup(){
+ const stamp=new Date().toISOString(),prev=S.lastBackup;S.lastBackup=stamp;
+ const json=JSON.stringify(S,null,2),name='student-manager-backup-'+dateKey(new Date())+'.json',file=new File([json],name,{type:'application/json'});let done=false;
+ try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Student Manager backup'});done=true}}catch(e){if(e&&e.name==='AbortError'){S.lastBackup=prev;return}}
+ if(!done){const l=document.createElement('a');l.href=URL.createObjectURL(file);l.download=name;l.click();setTimeout(()=>URL.revokeObjectURL(l.href),1000)}
+ S.lastBackup=stamp;try{localStorage.setItem('sl1',JSON.stringify(S))}catch(e){}render();$('#msg').textContent='Backup saved.'}
+/* Clashes: classes starting within CLASS_MIN minutes of each other */
+function clashesAt(date,time,skipId){return instancesForDate(fromKey(date)).filter(x=>String(x.id)!==String(skipId||'')&&Math.abs(tm(x.time)-tm(time))<CLASS_MIN)}
+const monthOf=k=>String(k||'').slice(0,7);
+const shortDate=k=>new Intl.DateTimeFormat('en-IN',{day:'numeric',month:'short'}).format(fromKey(k));
+function slotCountInRange(s,from,to){let n=0;const d=new Date(from),sl=s.slots||[];while(d<=to){n+=sl.filter(x=>x.d===d.getDay()).length;d.setDate(d.getDate()+1)}return n}
+/* In the month a student joins, the target is scaled to the classes that are left from the join date. */
+function defaultTarget(s,month){
+ const base=validTarget(s.monthlyTarget??4);
+ if(!s.joinedOn||monthOf(s.joinedOn)!==month)return base;
+ const[y,m]=month.split('-').map(Number),first=new Date(y,m-1,1),last=new Date(y,m,0),join=fromKey(s.joinedOn);
+ let total=slotCountInRange(s,first,last),rem=slotCountInRange(s,join,last);
+ if(!total){total=last.getDate();rem=last.getDate()-join.getDate()+1}
+ return validTarget(Math.round(base*rem/total)||1);
+}
+function monthRecord(s,month=cm(),create=false){
+ if(!s.monthlyProgress||typeof s.monthlyProgress!=='object')s.monthlyProgress={};
+ let r=s.monthlyProgress[month];
+ if(!r&&!create)return {target:defaultTarget(s,month),completed:[]};
+ if(!r)r=s.monthlyProgress[month]={target:defaultTarget(s,month),completed:[],auto:!!s.joinedOn&&monthOf(s.joinedOn)===month};
+ if(r.auto)r.target=defaultTarget(s,month);
+ r.target=validTarget(r.target??defaultTarget(s,month));r.completed=Array.isArray(r.completed)?r.completed.map(Boolean):[];
+ while(r.completed.length<r.target)r.completed.push(false);
+ return r;
+}
+function trackerStats(s,month=cm()){if(s.joinedOn&&month<monthOf(s.joinedOn))return {done:0,target:0,pct:0,remaining:0,notStarted:true};const r=monthRecord(s,month,false),legacy=r.completed.slice(0,r.target).filter(Boolean).length,done=legacy+attendanceForMonth(s.id,month).length;return {done,target:r.target,pct:Math.min(100,Math.round(done/Math.max(1,r.target)*100)),remaining:Math.max(0,r.target-done)}}
+const tm=t=>{const[h,m]=(t||'17:00').split(':');return (+h)*60+(+m)};
+const fmt=t=>{const[h,m]=(t||'17:00').split(':');return (h%12||12)+':'+m+(+h<12?' AM':' PM')};
+const slots=s=>(s.slots||[]).slice().sort((a,b)=>a.d-b.d||tm(a.t)-tm(b.t));
+const palette=['#d9d0ff','#ffd7cc','#d7e9ff','#d8f2b4','#ffe5a8','#c8eee8','#f6c9e4','#d8dce8'];
+/* Tiny custom illustrated portraits: consistent, colorful, no external avatar dependency. */
+function av(n){
+ n=Number(n)||0;const bg=palette[n%palette.length],skin=['#f1c9a5','#d9a273','#b57b4f','#7a4b2e','#e7b98f','#c88f6a'][n%6];
+ const hair=['#25253b','#573a2b','#a45c37','#d4a83c','#7c8193','#3c293d','#18191f','#b85b54'][Math.floor(n/2)%8];
+ const styles=[
+ `<path d="M15 31Q11 9 32 9Q53 9 49 32L45 23Q32 15 19 24Z" fill="${hair}"/>`,
+ `<path d="M14 33V27Q14 8 32 8Q51 8 50 28V42H44L42 24Q30 15 19 25L19 42H14Z" fill="${hair}"/>`,
+ `<path d="M14 26Q16 6 32 8Q49 7 50 27L43 20L37 14L23 20Z" fill="${hair}"/><circle cx="32" cy="8" r="5" fill="${hair}"/>`,
+ `<path d="M13 28Q13 8 32 8Q51 8 51 28L46 23L43 40L39 23Q29 15 20 24L18 40L15 23Z" fill="${hair}"/>`,
+ `<path d="M13 28Q14 7 32 8Q50 7 51 28L44 24Q32 17 20 24Z" fill="${hair}"/><path d="M16 17Q32 3 48 17" fill="none" stroke="${hair}" stroke-width="5" stroke-linecap="round"/>`,
+ `<path d="M12 31Q10 7 32 8Q54 7 52 31L45 24Q32 14 19 24Z" fill="${hair}"/><circle cx="15" cy="35" r="6" fill="${hair}"/><circle cx="49" cy="35" r="6" fill="${hair}"/>`
+ ];
+ const glasses=n%4===0?`<g fill="none" stroke="#28263a" stroke-width="2.3"><rect x="18" y="29" width="11" height="9" rx="3"/><rect x="35" y="29" width="11" height="9" rx="3"/><path d="M29 32h6"/></g>`:'';
+ const accessory=n%7===0?`<circle cx="46" cy="15" r="5" fill="#ff806e" stroke="#28263a" stroke-width="1.5"/>`:'';
+ return `<svg viewBox="0 0 64 64" role="img" aria-label="Illustrated student avatar"><rect width="64" height="64" rx="17" fill="${bg}"/><circle cx="9" cy="12" r="3" fill="#fff" opacity=".7"/><circle cx="54" cy="51" r="5" fill="#fff" opacity=".5"/><path d="M13 64Q15 48 32 48Q49 48 51 64" fill="${['#5666a9','#d66c62','#3b8d7b','#7652a0','#d19b35','#34435e'][n%6]}"/><path d="M26 43V51Q32 57 38 51V43" fill="${skin}"/><ellipse cx="32" cy="33" rx="17" ry="20" fill="${skin}"/>${styles[n%styles.length]}<path d="M24 40Q32 47 40 40" fill="none" stroke="#7b3f42" stroke-width="2" stroke-linecap="round"/><circle cx="25" cy="34" r="1.8" fill="#25253b"/><circle cx="39" cy="34" r="1.8" fill="#25253b"/><ellipse cx="20" cy="40" rx="3" ry="2" fill="#f27e83" opacity=".45"/><ellipse cx="44" cy="40" rx="3" ry="2" fill="#f27e83" opacity=".45"/>${glasses}${accessory}</svg>`;
+}
+function save(){localStorage.setItem('sl1',JSON.stringify(S));render();clearTimeout(save.t);save.t=setTimeout(sync,1500)}
+function nxt(s){const now=Date.now();let best=1e15;for(let i=0;i<15;i++){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+i);for(const x of instancesForDate(d)){if(String(x.studentId)!==String(s.id))continue;const delta=timeOnDate(x.date,x.time).getTime()-now;if(delta>=0&&delta<best)best=delta}}return best}
+function dateKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fromKey(k){const a=(k||'').split('-').map(Number);return new Date(a[0],a[1]-1,a[2])}
+function dayLabel(k){if(!k)return 'Date not set';return new Intl.DateTimeFormat('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}).format(fromKey(k))}
+function timeOnDate(k,t){const d=fromKey(k),[h,m]=(t||'17:00').split(':');d.setHours(+h,+m,0,0);return d}
+function studentById(id){return S.students.find(s=>String(s.id)===String(id))}
+function attendanceForMonth(studentId,month=cm()){
+ return S.attendance.filter(a=>String(a.studentId)===String(studentId)&&a.status!=='missed'&&String(a.date||'').slice(0,7)===month).sort((a,b)=>(String(a.date)+String(a.time)).localeCompare(String(b.date)+String(b.time))||String(a.takenAt||'').localeCompare(String(b.takenAt||'')));
+}
+function missedForMonth(studentId,month=cm()){return S.attendance.filter(a=>String(a.studentId)===String(studentId)&&a.status==='missed'&&String(a.date||'').slice(0,7)===month).sort((a,b)=>(String(a.date)+String(a.time)).localeCompare(String(b.date)+String(b.time)))}
+function attendanceForOccurrence(x){return S.attendance.find(a=>String(a.studentId)===String(x.studentId)&&String(a.occurrenceId)===String(x.id)&&String(a.date)===String(x.date))||null}
+function markOccurrence(occurrenceId,date,status){
+ const occurrence=instancesForDate(fromKey(date)).find(x=>String(x.id)===String(occurrenceId));
+ if(!occurrence){alert('That class is no longer on the current schedule. Refresh the page and check the class changes.');return}
+ if(attendanceForOccurrence(occurrence))return;
+ const record={id:crypto.randomUUID?crypto.randomUUID().slice(0,12):String(Date.now()),studentId:occurrence.studentId,occurrenceId:String(occurrence.id),date:occurrence.date,time:occurrence.time,kind:occurrence.kind,status:status==='missed'?'missed':'taken',takenAt:new Date().toISOString()};
+ S.attendance.push(record);save();
+}
+function miniCount(s){const t=trackerStats(s);return t.notStarted?'Starts '+shortDate(s.joinedOn):t.done+'/'+t.target}
+function pendingList(){const today=new Date();today.setHours(0,0,0,0);const list=[];for(let back=1;back<=30;back++){const d=new Date(today);d.setDate(d.getDate()-back);for(const x of instancesForDate(d)){if(timeOnDate(x.date,x.time).getTime()<=Date.now()&&!attendanceForOccurrence(x))list.push(x)}}return list.sort((a,b)=>(b.date+a.time).localeCompare(a.date+b.time))}
+function missedHtml(s,month){if(!s.id)return '';const m=missedForMonth(s.id,month);return m.length?`<div class="tracker-history"><strong>Missed (not counted)</strong>${m.map(r=>`<div class="payrow"><div><small style="margin:0">✕ ${esc(dayLabel(r.date))} · ${esc(fmt(r.time))}</small></div><button type="button" class="tracker-undo" data-a="undoTaken" data-id="${esc(r.id)}">Undo</button></div>`).join('')}</div>`:''}
+function renderPendingClasses(){
+ const panel=$('#pending');if(!panel)return;const list=pendingList();const show=list.slice(0,12);const pb=$('#pbadge');if(pb)pb.textContent=list.length?(list.length>99?'99+':list.length):'';
+ panel.innerHTML=show.length?`<section class="pendingpanel"><div class="pendinghead"><div><div class="eyebrow">Catch up your class log</div><h3>Recent classes not logged yet</h3></div><span class="pendingcount">${list.length} pending</span></div><div class="pendinglist">${show.map(x=>`<div class="pendingrow"><div><strong>${esc(x.student.name)}</strong><small>${dayLabel(x.date)} · ${fmt(x.time)} · ${x.kind==='rescheduled'?'Rescheduled':x.kind==='makeup'?'Make-up':'Regular'}</small></div><div class="rowbtns"><button type="button" class="taken-btn" data-a="taken" data-occurrence="${esc(x.id)}" data-date="${esc(x.date)}">✓ Taken</button><button type="button" class="taken-btn ghost" data-a="missed" data-occurrence="${esc(x.id)}" data-date="${esc(x.date)}">✕ Missed</button></div></div>`).join('')}</div>${list.length>1?`<button type="button" class="btn" style="width:100%;margin-top:10px" data-a="takenall">✓ Mark all ${list.length} as Taken</button>`:''}${list.length>show.length?`<p class="trackerhint">Showing the 12 most recent of ${list.length} unrecorded sessions from the past 30 days.</p>`:''}</section>`:'';
+}
+function instancesForDate(date){
+ const key=dateKey(date),wd=date.getDay(),out=[];
+ for(const student of S.students){if(!student.active)continue;
+  const exceptions=S.changes.filter(c=>String(c.studentId)===String(student.id));
+  for(const slot of (student.slots||[]))if(slot.d===wd&&!(student.joinedOn&&key<student.joinedOn)){
+   const altered=exceptions.find(c=>(c.type==='cancel'||c.type==='reschedule')&&c.originalDate===key);
+   if(!altered)out.push({student,studentId:student.id,date:key,time:slot.t||'17:00',kind:'regular',id:`regular-${student.id}-${key}`,note:''});
+  }
+  for(const change of exceptions){if(change.date!==key)continue;
+   if(change.type==='reschedule'||change.type==='makeup')out.push({student,studentId:student.id,date:key,time:change.time||'17:00',kind:change.type==='reschedule'?'rescheduled':'makeup',id:change.id,note:change.note||''});
+  }
+ }
+ return out.sort((a,b)=>tm(a.time)-tm(b.time));
+}
+function reminders(){const out=[],now=Date.now(),[mh,mm]=(S.cfg.morning||'07:30').split(':');
+ for(let i=0;i<14;i++){const dt=new Date();dt.setHours(0,0,0,0);dt.setDate(dt.getDate()+i);
+  for(const x of instancesForDate(dt)){
+   const c=timeOnDate(x.date,x.time).getTime(),mo=timeOnDate(x.date,`${mh}:${mm}`).getTime();
+   const kindLabel=x.kind==='rescheduled'?'Rescheduled class':x.kind==='makeup'?'Make-up class':'Regular class';
+   const body=`${kindLabel} · ${fmt(x.time)} · ${x.student.mode} · ${x.student.source}${x.note?' · '+x.note:''}`;
+   [[mo,'Today',mo<c-36e5],[c-36e5,'In 1 hour',1],[c-3e5,'In 5 min',1]].forEach(([t,k,ok])=>{if(ok&&t>now)out.push({id:x.id+'-'+k+'-'+t,t,title:`${k}: ${x.student.name}`,body})});
+  }
+ }
+ return out.sort((a,b)=>a.t-b.t)}
+async function sync(){const c=S.cfg||{};try{if(!('serviceWorker'in navigator))return;const reg=await navigator.serviceWorker.ready;if(reg.active)reg.active.postMessage({cfg:{url:c.url||'',token:c.token||''}});if(c.url&&c.sub)await fetch(c.url+'/sync',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+(c.token||'')},body:JSON.stringify({sub:c.sub,reminders:reminders()})})}catch(e){console.warn('Reminder sync failed',e)}}
+setInterval(async()=>{if(!('Notification'in window)||Notification.permission!='granted')return;const now=Date.now();for(const r of reminders())if(r.t<=now&&r.t>now-6e4&&!shown[r.id]){shown[r.id]=1;try{(await navigator.serviceWorker.ready).showNotification(r.title,{body:r.body,tag:r.id})}catch(e){}}},20000);
+const FD=[['src','Source',['All','NSM','Personal']],['st','Status',['Active','Discontinued','All']],['mode','Class type',['All','Offline','Online']],['fee','Fees',['All','Unpaid','Paid']],['day','Class day',['All',...D]]];
+const TABS=['today','students','changes','settings'];
+function applyTab(){const t=TABS.includes(S.tab)?S.tab:'today';document.body.dataset.tab=t;document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='view-'+t));document.querySelectorAll('.tabbar button').forEach(b=>{const on=b.dataset.v===t;b.classList.toggle('on',on);b.setAttribute('aria-current',on?'page':'false')})}
+function fillSettings(){$('#su').value=S.cfg.url||'';$('#st').value=S.cfg.token||'';$('#sm').value=S.cfg.morning||'07:30';$('#sb').value=String(S.cfg.backupDays||7);renderBackupInfo();renderSnaps()}
+function render(){
+ applyTab();renderBackupNote();renderBackupInfo();const f=S.f,q=$('#q').value.toLowerCase(),A=S.students.filter(s=>s.active),personalActive=A.filter(s=>s.source==='Personal');
+ const td=instancesForDate(new Date());
+ $('#datepill').textContent=new Intl.DateTimeFormat('en-IN',{weekday:'short',day:'2-digit',month:'short'}).format(new Date()).toUpperCase();
+ $('#mactive').textContent=A.length;$('#munpaid').textContent=personalActive.filter(s=>!paid(s)).length;$('#mclasses').textContent=td.length;
+ $('#herosub').textContent=A.length?`A good day to teach, connect and make a little progress.`:'Your student studio is ready for its first entry.';
+ $('#today').innerHTML=`<section class="today"><div class="todaytop"><h3>✳ Today’s class lineup</h3><span class="tag">${td.length} ${td.length===1?'class':'classes'}</span></div>${td.length?td.map(x=>{const taken=attendanceForOccurrence(x),passed=timeOnDate(x.date,x.time).getTime()<=Date.now(),kindTag=x.kind==='rescheduled'?'<span class="tag">RESCHEDULED</span>':x.kind==='makeup'?'<span class="tag">MAKE-UP</span>':'';return `<div class="todayclass"><div class="todayclassinfo"><p><strong>${fmt(x.time)}</strong> &nbsp;·&nbsp; ${esc(x.student.name)} <span style="opacity:.7">(${esc(x.student.mode)})</span> ${kindTag}</p>${taken?`<span class="takenstate">${taken.status==='missed'?'✕ Missed':'✓ Taken'} · ${dayLabel(taken.date)}</span>`:passed?'<span class="takenstate pendingstate">Scheduled time reached · mark after teaching</span>':'<span class="scheduledstate">Scheduled</span>'}</div>${taken?`<button type="button" class="taken-btn ghost" data-a="undoTaken" data-id="${esc(taken.id)}">Undo</button>`:passed?`<div class="rowbtns"><button class="taken-btn" data-a="taken" data-occurrence="${esc(x.id)}" data-date="${esc(x.date)}">✓ Taken</button><button class="taken-btn ghost" data-a="missed" data-occurrence="${esc(x.id)}" data-date="${esc(x.date)}">✕ Missed</button></div>`:''}</div>`}).join(''):'<p>No classes scheduled today. Enjoy the breathing room.</p>'}<p class="todayfoot">After a lesson, tap <strong>Taken</strong>; if the student didn’t show up, tap <strong>Missed</strong>. Taken classes count toward the monthly target and per-class fees.</p></section>`;
+ renderPendingClasses();
+ $('#chips').innerHTML=FD.map(([k,l,o])=>`<div class="chips"><span class="chiplabel">${l}</span>${o.map(v=>`<button class="chip ${f[k]==v?'on':''}" data-a="f" data-k="${k}" data-v="${v}">${v}</button>`).join('')}</div>`).join('');
+ $('#sort').value=f.sort;
+ {const nf=['src','mode','fee','day'].filter(k=>f[k]!=='All').length+(f.st!=='Active'?1:0);$('#fcount').textContent=nf?'· '+nf+' on':''}
+ let a=S.students.filter(s=>(f.src=='All'||s.source==f.src)&&(f.st=='All'||(f.st=='Active')==s.active)&&(f.mode=='All'||s.mode==f.mode)&&(f.fee=='All'||(s.source==='Personal'&&(f.fee==='Paid')===paid(s)))&&(f.day=='All'||(s.slots||[]).some(x=>x.d==D.indexOf(f.day))||S.changes.some(c=>String(c.studentId)===String(s.id)&&c.type!=='cancel'&&((c.date&&fromKey(c.date).getDay()===D.indexOf(f.day)))))&&((s.name||'')+' '+(s.notes||'')).toLowerCase().includes(q));
+ const key={next:s=>nxt(s),name:s=>(s.name||'').toLowerCase(),fee:s=>s.source==='Personal'?(paid(s)?1:0):2}[f.sort];
+ a.sort((x,y)=>(Number(y.active)-Number(x.active))||(key(x)>key(y)?1:key(x)<key(y)?-1:0));
+ $('#resultcount').textContent=`${a.length} ${a.length===1?'student':'students'} · ${a.filter(s=>s.active).length} active`;
+ $('#list').innerHTML=a.map(s=>`<article class="student ${s.active?'':'discontinued'}" style="--accent:${palette[(Number(s.av)||0)%palette.length]}" data-a="edit" data-id="${esc(s.id)}" tabindex="0" role="button" aria-label="Edit ${esc(s.name)}">
+ <div class="avatar">${av(s.av)}</div><div class="studentmain"><div class="studenttop"><div class="studentname">${esc(s.name)}</div></div>
+ <div class="badges"><span class="badge ${s.source==='Personal'?'personal':''}">${esc(s.source||'Personal')}</span><span class="badge ${s.mode==='Online'?'online':'offline'}">${esc(s.mode||'Offline')}</span>${s.active?'':'<span class="badge">Paused</span>'}${s.joinedOn&&monthOf(s.joinedOn)===cm()?`<span class="badge">Joined ${esc(shortDate(s.joinedOn))}</span>`:''}</div>
+ <div class="schedule">${slots(s).map(x=>D[x.d]+' · '+fmt(x.t)).join('<br>')||'No class schedule yet'}</div>${s.notes?`<div class="note">${esc(s.notes)}</div>`:''}<div class="monthly-mini"><div class="monthly-minihead"><span>Classes this month</span><strong>${miniCount(s)}</strong></div><div class="monthly-track"><span style="width:${trackerStats(s).pct}%"></span></div></div></div>
+ <div class="cardbottom"><span class="status">${s.active?'● ACTIVE':'○ DISCONTINUED'}</span>${s.active&&s.source==='Personal'?`<button class="fee ${paid(s)?'p':'u'}" data-a="fee" data-id="${esc(s.id)}">${feeLabel(s)}</button>`:s.active&&s.source==='NSM'?'<span class="status">NSM · FEES HANDLED BY SCHOOL</span>':'<span class="status">ARCHIVED</span>'}</div></article>`).join('')||`<div class="empty"><div class="emoji">✳</div><strong>No students found.</strong><br>Try another filter, or add someone new.</div>`;
+ renderChanges();
+}
+function renderChanges(){
+ const today=dateKey(new Date()),cut=new Date();cut.setDate(cut.getDate()-14);const cutKey=dateKey(cut);
+ const list=S.changes.filter(c=>{const k=c.date||c.originalDate||'';return k>=today||k>=cutKey}).sort((a,b)=>String(b.createdAt||b.date||b.originalDate).localeCompare(String(a.createdAt||a.date||a.originalDate))).slice(0,30);
+ $('#changes').innerHTML=list.map(c=>{const s=studentById(c.studentId),type=c.type||'makeup',kind=type==='cancel'?'cancelled':type==='reschedule'?'rescheduled':'makeup',ico=type==='cancel'?'×':type==='reschedule'?'↗':'✳',title=type==='cancel'?'Class cancelled':type==='reschedule'?'Class rescheduled':'Make-up class',target=type==='cancel'?c.originalDate:c.date;return `<article class="changeitem ${kind}"><div class="changeicon">${ico}</div><div class="changecontent"><div class="changetitle">${esc(s?s.name:'Deleted student')}</div><div class="changedetail">${dayLabel(target)}${type==='reschedule'?` · moved from ${dayLabel(c.originalDate)}`:''}${type!=='cancel'?' · '+fmt(c.time):''}</div>${c.note?`<div class="changedetail">${esc(c.note)}</div>`:''}<span class="changetype">${title}</span></div><div class="changeactions"><button class="btn" data-a="editchange" data-id="${esc(c.id)}">Edit</button><button class="btn danger" data-a="delchange" data-id="${esc(c.id)}" aria-label="Delete class change">×</button></div></article>`}).join('')||'<div class="changeempty">No recent schedule changes. Log a cancellation, reschedule or make-up class here; reminders will follow the updated schedule.</div>';
+}
+function open(id){const s=S.students.find(x=>x.id==id);E=s?JSON.parse(JSON.stringify(s)):{name:'',av:Math.floor(Math.random()*24),source:'NSM',mode:'Offline',slots:[],notes:'',active:true,feeMonth:'',monthlyTarget:4,monthlyProgress:{},joinedOn:dateKey(new Date()),feeModel:'monthly',feeAmount:'',feeFrom:''};E.slots=E.slots||[];E.monthlyTarget=validTarget(E.monthlyTarget??4);E.monthlyProgress=E.monthlyProgress&&typeof E.monthlyProgress==='object'?E.monthlyProgress:{};trackerMonth=cm();monthRecord(E,trackerMonth,true);form();$('#dlg').showModal()}
+const seg=(a,cur,o,extra='')=>`<div class="segment ${extra}">${o.map(([v,l])=>`<button type="button" data-a="${a}" data-v="${v}" class="${cur==v?'on':''}">${l??v}</button>`).join('')}</div>`;
+function form(){
+ const e=E,r=monthRecord(e,trackerMonth||cm(),true);
+ $('#fm').innerHTML=`<div class="modalhead"><div><div class="eyebrow">${e.id?'Student profile':'New addition'}</div><h2>${e.id?'Edit student':'Add a student'}</h2></div><button type="button" class="btn iconbtn" data-a="close" aria-label="Close">×</button></div>
+ <div class="modalbody"><label>Choose their portrait</label><div class="avatars">${Array.from({length:24},(_,i)=>`<button type="button" data-a="av" data-v="${i}" class="${e.av==i?'on':''}" aria-label="Avatar ${i+1}">${av(i)}</button>`).join('')}</div>
+ <label for="fn">Student name</label><input id="fn" value="${esc(e.name)}" placeholder="e.g. Ananya Sen" autocomplete="name">
+ <div class="formgrid"><div><label>Student source</label>${seg('src',e.source,[['NSM','NSM'],['Personal','Personal']])}</div><div><label>Class format</label>${seg('mode',e.mode,[['Offline'],['Online']])}</div></div>
+ <label>Weekly class days</label><div class="segment days">${D.map((d,i)=>`<button type="button" data-a="day" data-v="${i}" class="${e.slots.some(x=>x.d==i)?'on':''}">${d}</button>`).join('')}</div>
+ <div id="slots">${slots(e).map(x=>`<div class="slot"><span>${D[x.d]}</span><input type="time" data-slot="${x.d}" value="${esc(x.t)}" aria-label="${D[x.d]} class time"></div>`).join('')}</div><p class="helper">Tap a day to add or remove it. Set each class time below.</p>
+ <label for="fjoin">Joined on</label><input id="fjoin" type="date" value="${esc(e.joinedOn||'')}"><p class="helper">Classes, reminders and the monthly target count from this date. Leave empty to count the whole month.</p>
+ <hr><div class="eyebrow">Monthly lesson count</div><div class="formgrid"><div><label for="ftarget">Monthly class target</label><input id="ftarget" type="number" min="1" max="31" step="1" value="${r.target}"><p class="helper">Defaults to 4; customise this per student.</p></div><div><label for="trackmonth">Month to view</label><input id="trackmonth" type="month" value="${esc(trackerMonth||cm())}"><p class="helper">Previous months stay saved for review.</p></div></div><div id="monthly-tracker"></div>
+ ${e.source==='Personal'?feeSection(e):'<hr><p class="helper">NSM student: fees are handled by the school, so nothing is tracked here.</p>'}
+ <label for="fnt">Notes <span style="font-weight:500;color:var(--muted)">(optional)</span></label><textarea id="fnt" rows="3" placeholder="Repertoire, goals, reminders…">${esc(e.notes)}</textarea>
+ <label>Student status</label>${seg('act',e.active?1:0,[[1,'● Active'],[0,'○ Discontinued']])}
+ <div class="actions"><button type="button" class="btn dark" data-a="save">Save student ↗</button><button type="button" class="btn" data-a="close">Cancel</button>${e.id?'<button type="button" class="btn danger push" data-a="del">Delete</button>':''}</div></div>`;
+ renderMonthlyTracker();renderFeeHistory();
+}
+function feeSection(e){const cls=feeModel(e)==='class';
+ return `<hr><div class="eyebrow">Fees</div><label>How do they pay?</label>${seg('fmodel',feeModel(e),[['monthly','Monthly fee'],['class','Per class']])}
+ <div class="formgrid"><div><label for="ffee">${cls?'Fee per class (₹)':'Monthly fee (₹)'}</label><input id="ffee" type="number" min="0" step="50" inputmode="numeric" value="${esc(e.feeAmount||'')}" placeholder="optional"></div>${cls?`<div><label for="ffrom">Bill classes from</label><input id="ffrom" type="date" value="${esc(e.feeFrom||'')}"></div>`:''}</div>
+ <p class="helper">${cls?'Every class you mark Taken becomes due. Tap the fee button on the student card to record a payment for all unpaid classes. Missed classes are not billed.':'Tap the fee button on the student card once they have paid for the month.'}</p>${e.id?'<div id="feehistory"></div>':''}`}
+function renderFeeHistory(){const box=$('#feehistory');if(!box||!E||!E.id)return;
+ const list=paymentsFor(E.id).slice().sort((a,b)=>String(b.date||b.month).localeCompare(String(a.date||a.month))).slice(0,10),info=feeInfo(E);
+ const state=info.due?(info.model==='class'?info.count+' unpaid class'+(info.count===1?'':'es')+(info.hasAmt?' · '+money(info.amount):''):monthLabel(cm())+' unpaid'):'All paid';
+ box.innerHTML=`<div class="trackerpanel" style="margin-top:12px"><div class="trackerhead"><strong>Payments</strong><span class="tracker-count" style="color:${info.due?'var(--red)':'var(--green)'}">${state}</span></div>${list.length?list.map(p=>`<div class="payrow"><div><strong>${p.amount?money(p.amount):'Paid'}</strong><small>${p.model==='class'?(p.classes||0)+' class'+((p.classes||0)===1?'':'es'):esc(monthLabel(p.month))} · ${p.date?esc(dayLabel(p.date)):'date not recorded'}</small></div><button type="button" class="tracker-undo" data-a="delpay" data-id="${esc(p.id)}">Delete</button></div>`).join(''):'<p class="trackerhint">No payments recorded yet.</p>'}</div>`}
+function renderMonthlyTracker(){
+ const panel=$('#monthly-tracker');if(!panel||!E)return;const month=trackerMonth||cm();if(E.joinedOn&&month<monthOf(E.joinedOn)){panel.innerHTML=`<div class="trackerpanel"><p class="trackerhint" style="margin:0">This student joined on ${esc(dayLabel(E.joinedOn))}, so there are no lessons to track for this month.</p></div>`;return}const r=monthRecord(E,month,true),taken=E.id?attendanceForMonth(E.id,month):[],legacy=r.completed.slice(0,r.target).filter(Boolean).length,done=legacy+taken.length,target=r.target;
+ const label=new Intl.DateTimeFormat('en-IN',{month:'long',year:'numeric'}).format(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1));
+ const rowCount=Math.max(target,done);const items=Array.from({length:rowCount},(_,i)=>{
+  if(i<legacy)return `<div class="trackeritem done"><span class="trackercheck">✓</span><span><strong>Class ${i+1}</strong><small>Previously marked complete · date not recorded</small></span></div>`;
+  const record=taken[i-legacy];if(record){const k=record.kind==='rescheduled'?'Rescheduled':record.kind==='makeup'?'Make-up':'Regular';return `<div class="trackeritem done"><span class="trackercheck">✓</span><span><strong>Class ${i+1}</strong><small>${esc(dayLabel(record.date))} · ${esc(fmt(record.time))} · ${k}</small></span><button type="button" class="tracker-undo" data-a="undoTaken" data-id="${esc(record.id)}" title="Undo this Taken record">Undo</button></div>`}
+  return `<div class="trackeritem"><span class="trackercheck pendingcheck">○</span><span><strong>Class ${i+1}</strong><small>${i+1>target?'Extra class beyond target':'Pending · tap Taken after the lesson'}</small></span></div>`;
+ }).join('');
+ panel.innerHTML=`<div class="trackerpanel"><div class="trackerhead"><strong>${esc(label)} lesson record</strong><span class="tracker-count">${done} / ${target} completed</span></div><div class="trackerbar"><span style="width:${Math.min(100,Math.round(done/Math.max(1,target)*100))}%"></span></div><div class="trackeritems">${items}</div>${missedHtml(E,month)}<p class="trackerhint">Class dates are recorded automatically when you tap Taken on the scheduled class. Rescheduled and make-up lessons count on the date they were scheduled. Unmarked legacy checkboxes are preserved as completed, but have no saved date.</p>${E.id?'':'<p class="trackerhint">Save this student first; then mark classes Taken from the class lineup.</p>'}</div>`;
+}
+function persistTracker(){
+ if(!E)return;const live=studentById(E.id);if(!live)return;live.monthlyTarget=validTarget(E.monthlyTarget);live.monthlyProgress=JSON.parse(JSON.stringify(E.monthlyProgress||{}));localStorage.setItem('sl1',JSON.stringify(S));render();
+}
+function setTrackerTarget(value){
+ if(!E)return;const n=validTarget(value),month=trackerMonth||cm();const r=monthRecord(E,month,true);r.target=n;r.manual=true;r.auto=false;while(r.completed.length<n)r.completed.push(false);
+ if(month===cm())E.monthlyTarget=n;const live=studentById(E.id);if(live){live.monthlyProgress=JSON.parse(JSON.stringify(E.monthlyProgress));if(month===cm())live.monthlyTarget=n;persistTracker()}renderMonthlyTracker();
+}
+$('#fm').addEventListener('input',e=>{if(e.target.id==='ffee'){E.feeAmount=e.target.value===''?'':Math.max(0,Number(e.target.value)||0);if(typeof renderFeeHistory==='function')renderFeeHistory()}if(e.target.id==='fn')E.name=e.target.value;if(e.target.id==='fnt')E.notes=e.target.value;if(e.target.dataset.slot!=null){const sl=E.slots.find(x=>x.d==Number(e.target.dataset.slot));if(sl)sl.t=e.target.value||'17:00'}});
+$('#fm').addEventListener('change',e=>{if(!E)return;if(e.target.id==='ffrom'){E.feeFrom=e.target.value||'';renderFeeHistory();return}if(e.target.id==='fjoin'){E.joinedOn=e.target.value||'';const jm=monthOf(E.joinedOn),jr=jm&&E.monthlyProgress&&E.monthlyProgress[jm];if(jr&&!jr.manual)jr.auto=true;const rr=monthRecord(E,trackerMonth||cm(),true),ft=$('#ftarget');if(ft)ft.value=rr.target;renderMonthlyTracker();return}if(e.target.id==='ftarget'){setTrackerTarget(e.target.value);return}if(e.target.id==='trackmonth'){if(!e.target.value)return;trackerMonth=e.target.value;const r=monthRecord(E,trackerMonth,true);$('#ftarget').value=r.target;renderMonthlyTracker();return}});
+$('#changeForm').addEventListener('input',e=>{if(!C)return;if(e.target.id==='cstudent')C.studentId=e.target.value;if(e.target.id==='corig')C.originalDate=e.target.value;if(e.target.id==='cdate')C.date=e.target.value;if(e.target.id==='ctime')C.time=e.target.value;if(e.target.id==='cnote')C.note=e.target.value;});
+function openChange(id){
+ const old=S.changes.find(x=>String(x.id)===String(id));const student=S.students.find(x=>x.active)||S.students[0];
+ const todayDate=new Date();todayDate.setHours(0,0,0,0);let sourceDate=new Date(todayDate),hasWeekly=!!(student&&(student.slots||[]).length);
+ if(hasWeekly){let found=false;for(let i=0;i<14&&!found;i++){const d=new Date(todayDate);d.setDate(d.getDate()+i);if(student.slots.some(slot=>slot.d===d.getDay())){sourceDate=d;found=true}}}
+ const destination=new Date(sourceDate);destination.setDate(destination.getDate()+1);
+ C=old?JSON.parse(JSON.stringify(old)):{id:'',studentId:(student?.id||''),type:hasWeekly?'reschedule':'makeup',originalDate:dateKey(sourceDate),date:dateKey(destination),time:'17:00',note:'',createdAt:new Date().toISOString()};
+ drawChangeForm();$('#changeDlg').showModal();
+}
+function drawChangeForm(){
+ const c=C,people=S.students.filter(s=>s.active||String(s.id)===String(c.studentId));
+ const selectedType=c.type||'reschedule';
+ const opts=people.map(s=>`<option value="${esc(s.id)}" ${String(s.id)===String(c.studentId)?'selected':''}>${esc(s.name)}${s.source==='NSM'?' · NSM':''}${s.active?'':' · Discontinued'}</option>`).join('');
+ $('#changeForm').innerHTML=`<div class="modalhead"><div><div class="eyebrow">Keep the diary accurate</div><h2>${c.id?'Edit class change':'Log a class change'}</h2></div><button type="button" class="btn iconbtn" data-a="closechange" aria-label="Close">×</button></div>
+ <div class="modalbody"><label for="cstudent">Student</label><select id="cstudent" ${people.length?'':'disabled'}>${opts||'<option value="">Add a student first</option>'}</select>
+ <label>What happened?</label>${seg('ctype',selectedType,[['reschedule','↗ Reschedule'],['makeup','✳ Make-up'],['cancel','× Cancel class']])}
+ ${selectedType!=='makeup'?`<label for="corig">${selectedType==='cancel'?'Cancelled class date':'Original class date'}</label><input id="corig" type="date" value="${esc(c.originalDate||dateKey(new Date()))}"><p class="helper">Choose the date of the regular weekly class being changed. The old class reminder will be removed.</p>`:''}
+ ${selectedType!=='cancel'?`<label for="cdate">${selectedType==='makeup'?'Make-up date':'New class date'}</label><input id="cdate" type="date" value="${esc(c.date||dateKey(new Date()))}"><label for="ctime">${selectedType==='makeup'?'Make-up time':'New class time'}</label><input id="ctime" type="time" value="${esc(c.time||'17:00')}">`:''}
+ <label for="cnote">Note <span style="font-weight:500;color:var(--muted)">(optional)</span></label><textarea id="cnote" rows="2" placeholder="Reason, agreed date, or context…">${esc(c.note||'')}</textarea>
+ <div class="actions"><button type="button" class="btn dark" data-a="savechange">Save change ↗</button><button type="button" class="btn" data-a="closechange">Cancel</button>${c.id?'<button type="button" class="btn danger push" data-a="delchangeFromForm">Delete record</button>':''}</div>
+ <p class="helper">Notifications recalculate after saving: cancellations stop reminders, reschedules move them, and make-ups get their own reminders.</p></div>`;
+}
+function saveChange(){
+ const student=studentById(C.studentId);if(!student){alert('Please add or select a student first.');return}
+ if((C.type==='cancel'||C.type==='reschedule')&&!C.originalDate){alert('Choose the original class date.');return}
+ if(C.type==='cancel'||C.type==='reschedule'){const date=fromKey(C.originalDate);const slot=(student.slots||[]).find(x=>x.d===date.getDay());if(!slot){alert('That date does not match one of this student’s regular class days. Use Make-up for an extra class.');return}C.originalTime=slot.t||'17:00'}
+ if(C.type==='reschedule'||C.type==='makeup'){if(!C.date||!C.time){alert('Choose the new class date and time.');return}if(C.date<C.originalDate&&C.type==='reschedule'){/* Past dates are allowed for accurate history. */}}
+ if(C.type!=='cancel'){const cl=clashesAt(C.date,C.time,C.id).filter(x=>!(C.type==='reschedule'&&x.kind==='regular'&&String(x.studentId)===String(C.studentId)&&x.date===C.originalDate));if(cl.length&&!confirm('On '+dayLabel(C.date)+' this overlaps with '+cl.map(x=>x.student.name+' at '+fmt(x.time)).join(', ')+'. Save anyway?'))return}
+ C.studentId=student.id;C.note=(C.note||'').trim();C.createdAt=C.createdAt||new Date().toISOString();
+ if(C.type==='cancel'){C.date=C.originalDate;C.time=C.originalTime||'17:00'}
+ // A regular class occurrence can have only one active override: cancellation OR reschedule.
+ if(C.type==='cancel'||C.type==='reschedule')S.changes=S.changes.filter(x=>!(String(x.studentId)===String(C.studentId)&&x.originalDate===C.originalDate&&(x.type==='cancel'||x.type==='reschedule')&&String(x.id)!==String(C.id)));
+ if(C.id){const i=S.changes.findIndex(x=>String(x.id)===String(C.id));if(i>=0)S.changes[i]=C;else S.changes.push(C)}else{C.id=crypto.randomUUID?crypto.randomUUID().slice(0,8):String(Date.now()).slice(-8);S.changes.push(C)}
+ $('#changeDlg').close();save();
+}
+$('#view-settings').addEventListener('change',e=>{if(!['su','st','sm','sb'].includes(e.target.id))return;S.cfg.url=$('#su').value.trim().replace(/\/$/,'');S.cfg.token=$('#st').value;S.cfg.morning=$('#sm').value||'07:30';S.cfg.backupDays=Number($('#sb').value)||7;save();$('#msg').textContent='Saved.'});
+$('#q').oninput=render;$('#sort').onchange=e=>{S.f.sort=e.target.value;save()};
+document.addEventListener('click',async ev=>{
+ const b=ev.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v,id=b.dataset.id;
+ if(a==='fee'){ev.stopPropagation();const s=S.students.find(x=>x.id==id);if(s&&s.source==='Personal')toggleFee(s);return}
+ if(a==='delpay'){ev.stopPropagation();if(confirm('Delete this payment record?')){S.payments=S.payments.filter(x=>String(x.id)!==String(id));save();renderFeeHistory()}return}
+ if(a==='fmodel'){E.feeModel=v;if(v==='class'&&!E.feeFrom)E.feeFrom=E.joinedOn||dateKey(new Date());return form()}
+ if(a==='restore'){let arr=[];try{arr=JSON.parse(localStorage.getItem('sl1_snaps')||'[]')}catch(e){}const x=arr[+id];if(!x)return;if(!confirm('Restore this copy? Your current data is saved as a restore point first.'))return;try{const d=JSON.parse(x.json);if(!d||!Array.isArray(d.students))throw new Error('bad');snapshot('Before restore');S=d;normalizeState();save();renderSnaps();$('#msg').textContent='Restored.'}catch(e){$('#msg').textContent='Could not restore that copy.'}return}
+ if(a==='taken'){ev.stopPropagation();return markOccurrence(b.dataset.occurrence,b.dataset.date,'taken')}
+ if(a==='missed'){ev.stopPropagation();return markOccurrence(b.dataset.occurrence,b.dataset.date,'missed')}
+ if(a==='takenall'){const list=pendingList();if(!list.length)return;if(!confirm('Mark all '+list.length+' pending classes as Taken?'))return;const stamp=new Date().toISOString();list.forEach(x=>{if(!attendanceForOccurrence(x))S.attendance.push({id:uid(),studentId:x.studentId,occurrenceId:String(x.id),date:x.date,time:x.time,kind:x.kind,status:'taken',takenAt:stamp})});return save()}
+ if(a==='undoTaken'){ev.stopPropagation();if(paidAttIds().has(String(id))){alert('This class is already covered by a recorded payment. Delete that payment first.');return}if(confirm('Undo this record? The class will return to pending.')){S.attendance=S.attendance.filter(x=>String(x.id)!==String(id));save();if(E)renderMonthlyTracker()}return}
+ if(a==='edit')return open(id);if(a==='new')return open();if(a==='newchange')return openChange();if(a==='editchange')return openChange(id);if(a==='ctype'){C.type=v;return drawChangeForm()}if(a==='savechange')return saveChange();if(a==='closechange')return $('#changeDlg').close();if(a==='delchangeFromForm'){if(confirm('Delete this class-change record? The regular weekly schedule will apply again.')){S.changes=S.changes.filter(x=>String(x.id)!==String(C.id));$('#changeDlg').close();save()}return}if(a==='delchange'){const c=S.changes.find(x=>String(x.id)===String(id));if(c&&confirm('Delete this class-change record? The regular weekly schedule will apply again.')){S.changes=S.changes.filter(x=>String(x.id)!==String(id));save()}return}
+ if(a==='f'){S.f[b.dataset.k]=v;return save()}
+ if(a==='av'){E.av=+v;return form()}if(a==='src'){E.source=v;return form()}if(a==='mode'){E.mode=v;return form()}if(a==='act'){E.active=v==1;return form()}
+ if(a==='day'){const day=+v,i=E.slots.findIndex(x=>x.d==day);i<0?E.slots.push({d:day,t:E.slots.at(-1)?.t||'17:00'}):E.slots.splice(i,1);return form()}
+ if(a==='close')return $('#dlg').close();
+ if(a==='save'){if(!E.name.trim()){$('#fn').focus();$('#fn').style.borderColor='var(--red)';return}E.name=E.name.trim();E.monthlyTarget=validTarget(E.monthlyTarget??4);E.monthlyProgress=E.monthlyProgress&&typeof E.monthlyProgress==='object'?E.monthlyProgress:{};E.feeModel=feeModel(E);E.feeAmount=Number(E.feeAmount)||0;E.feeFrom=E.feeFrom||'';
+  {const old=E.id&&studentById(E.id),clashes=[];if(E.active)for(const sl of E.slots){if(old&&(old.slots||[]).some(o=>o.d===sl.d&&o.t===sl.t))continue;for(const o of S.students){if(!o.active||String(o.id)===String(E.id))continue;for(const q of (o.slots||[]))if(q.d===sl.d&&Math.abs(tm(q.t)-tm(sl.t))<CLASS_MIN)clashes.push(o.name+' ('+D[sl.d]+' '+fmt(q.t)+')')}}
+   if(clashes.length&&!confirm('This overlaps with '+clashes.join(', ')+'. Save anyway?'))return}
+  if(E.id){const i=S.students.findIndex(x=>x.id==E.id);if(i>=0)S.students[i]=E}else{E.id=crypto.randomUUID?crypto.randomUUID().slice(0,8):String(Date.now()).slice(-8);S.students.push(E)}$('#dlg').close();return save()}
+ if(a==='del'){if(confirm('Delete '+E.name+' permanently? Their class-change records will also be deleted. Choose Discontinued instead to keep the history.')){snapshot('Before deleting '+E.name);S.students=S.students.filter(x=>x.id!=E.id);S.payments=S.payments.filter(x=>String(x.studentId)!==String(E.id));S.changes=S.changes.filter(x=>String(x.studentId)!==String(E.id));S.attendance=S.attendance.filter(x=>String(x.studentId)!==String(E.id));$('#dlg').close();save()}return}
+ if(a==='tab'){S.tab=v;try{localStorage.setItem('sl1',JSON.stringify(S))}catch(e){}if(v==='settings'){fillSettings();$('#msg').textContent=''}render();window.scrollTo(0,0);return}
+ if(a==='enable'){S.cfg.url=$('#su').value.trim().replace(/\/$/,'');S.cfg.token=$('#st').value;S.cfg.morning=$('#sm').value||'07:30';
+  try{if(!S.cfg.url)throw new Error('Add your push server URL first.');if(!('serviceWorker'in navigator)||!('PushManager'in window))throw new Error('Push reminders are not supported by this browser.');if(await Notification.requestPermission()!=='granted')throw new Error('Notifications are blocked for this site.');
+   const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
+   if(!sub){const response=await fetch(S.cfg.url+'/pubkey',{headers:{'Authorization':'Bearer '+(S.cfg.token||'')}});if(!response.ok)throw new Error('Could not fetch the push server key.');const k=await response.text(),p=k.replace(/-/g,'+').replace(/_/g,'/');sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:Uint8Array.from(atob(p),c=>c.charCodeAt(0))})}
+   S.cfg.sub=sub.toJSON();save();$('#msg').textContent='Reminders enabled. '+reminders().length+' reminder alerts scheduled for actual classes in the next 14 days.'
+  }catch(e){$('#msg').textContent='Could not enable: '+e.message}return}
+ if(a==='export')return exportBackup();
+ if(a==='import')return $('#file').click();
+});
+$('#list').addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('.student')){e.preventDefault();open(e.target.dataset.id)}});
+$('#file').onchange=async e=>{try{if(!e.target.files[0])return;const d=JSON.parse(await e.target.files[0].text());if(!d||!Array.isArray(d.students))throw new Error('Invalid backup');if(confirm('Import this backup and replace the student data currently in this browser?')){snapshot('Before import');S=d;S.cfg=S.cfg||{};S.changes=Array.isArray(S.changes)?S.changes:[];S.attendance=Array.isArray(S.attendance)?S.attendance:[];S.payments=Array.isArray(S.payments)?S.payments:[];S.f=Object.assign({src:'All',st:'Active',mode:'All',fee:'All',day:'All',sort:'next'},S.f||{});S.students.forEach(s=>{s.monthlyTarget=validTarget(s.monthlyTarget??4);s.monthlyProgress=s.monthlyProgress&&typeof s.monthlyProgress==='object'?s.monthlyProgress:{}});migrateFees();save();$('#msg').textContent='Backup imported successfully.'}}catch(x){$('#msg').textContent='That file is not a valid Student Manager backup.'}e.target.value=''};
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').then(sync).catch(()=>{});
+migrateFees();
+{const h=(location.hash||'').slice(1);if(TABS.includes(h))S.tab=h}
+window.addEventListener('hashchange',()=>{const h=(location.hash||'').slice(1);if(TABS.includes(h)){S.tab=h;render();window.scrollTo(0,0)}});
+{const k=dateKey(new Date());if(S.students.length&&localStorage.getItem('sl1_snapday')!==k){snapshot('Daily');try{localStorage.setItem('sl1_snapday',k)}catch(e){}}}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+fillSettings();render();
+</script>
+</body>
+</html>
